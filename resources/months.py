@@ -3,6 +3,7 @@ from flask_restful import Api, Resource
 from flask_httpauth import HTTPBasicAuth
 import json
 import os
+import unicodedata
 
 import config
 import authinfo
@@ -70,15 +71,23 @@ class Last6MonthsAPI(Resource):
         last6Months = sorted(info.items(), key=lambda kv: kv[0])[-6:]
 
         outputDict = dict()
-        outputDict['Contract'] = id
-        outputDict['MonthReports'] = list()
+        outputDict["Contract"] = id
+        outputDict["MonthReports"] = list()
         for item in last6Months:
             #print(item) # item is a list of tuples
             date,(cons, unit, friendlyDate) = item
             #print(date,cons,unit,friendlyDate)
-            outputDict['MonthReports'].append({"date":date, "value":cons, "unit":unit, "friendlyDate":friendlyDate})
+            outputDict["MonthReports"].append(
+                {
+                    "date":  date,
+                    "value": cons,
+                    "unit":  unit,
+                    "friendlyDate":friendlyDate,
+                }
+            )
 
         myprint(1, json.dumps(outputDict, ensure_ascii=False))
+        #r = unicode(str, errors='replace')
         return outputDict
 
     def put(self, id):

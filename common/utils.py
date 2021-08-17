@@ -59,8 +59,8 @@ def dumpToFile(fname, plainText):
     except IOError as e:
         msg = "I/O error: Creating %s: %s" % (fname, "({0}): {1}".format(e.errno, e.strerror))
         myprint(1,msg)
-        return(1)
-    return(0)
+        return -1
+    return 0
 
 ####
 def dumpJsonToFile(fname, textDict):
@@ -74,8 +74,8 @@ def dumpJsonToFile(fname, textDict):
     except IOError as e:
         msg = "I/O error: Creating %s: %s" % (fname, "({0}): {1}".format(e.errno, e.strerror))
         myprint(1,msg)
-        return(1)
-    return(0)
+        return -1
+    return 0
 
 ####
 def humanBytes(size):

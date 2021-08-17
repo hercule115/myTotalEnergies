@@ -210,6 +210,9 @@ class TotalEnergies:
 
         # Execute "initialPage" request
         respText = self._executeRequest('initialPage')
+        if 'ErRoR' in respText:
+            myprint(1, "Error when executing 'initialPage' request")
+            return respText
 
         # Parse output text to build 'login' request
         loginUrl, loginFormData = self._parseInitialPage(respText)
@@ -257,6 +260,11 @@ class TotalEnergies:
         info = self._parseMonHistoriqueConsoElecPage(respText)
 
         for interval in info['DataConsommation']:
+            # Check if this interval is requested
+            if not interval in mg.consumptionFilesDict:
+                myprint(1, 'Skipping interval %s' % (interval))
+                continue
+
             myprint(1, 'Downloading consumption for interval: %s' % (interval))
             url = info['DataConsommation'][interval]
             #myprint(1, 'URL info["DataConsommation"][%s] = %s' % (interval, url))
@@ -649,17 +657,35 @@ class TotalEnergies:
             
         myprint(1,'Request type: %s, Request URL: %s' % (rqstType, rqstURL))
         myprint(2,'Request Headers:', json.dumps(hdrs.headers, indent=2))
+
+        errFlag = False
         
         if rqstType == 'GET':
-            myprint(2,'Request Stream:', rqstStream, 'CSV Stream:', csvStream)
-            r = self._session.get(rqstURL, headers=hdrs.headers, stream=rqstStream)
+            try:
+                myprint(2,'Request Stream:', rqstStream, 'CSV Stream:', csvStream)
+                r = self._session.get(rqstURL, headers=hdrs.headers, stream=rqstStream)
+            except requests.exceptions.RequestException as e:
+                errFlag = True
+                
         elif rqstType == 'POST':
             rqstPayload  = rqst["rqst"]["payload"]
             myprint(1,"payload=%s" % rqstPayload)
-            r = self._session.post(rqstURL, headers=hdrs.headers, data=rqstPayload)
+            try:
+                r = self._session.post(rqstURL, headers=hdrs.headers, data=rqstPayload)
+            except requests.exceptions.RequestException as e:
+                errFlag = True
+                
         else:	# OPTIONS
             assert(rqstType == 'OPTIONS')
-            r = self._session.options(rqstURL, headers=hdrs.headers)
+            try:
+                r = self._session.options(rqstURL, headers=hdrs.headers)
+            except requests.exceptions.RequestException as e:
+                errFlag = True
+
+        if errFlag:
+            errorMsg = 'ErRoR while retrieving information: %s' % (e) # Dont't change the cast for ErRoR  !!!!
+            myprint(0, errorMsg)
+            return errorMsg
 
         myprint(1,'Response Code:',r.status_code)
 

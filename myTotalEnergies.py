@@ -284,7 +284,7 @@ if __name__ == "__main__":
     mg.lastDayCachePath = os.path.join(mg.moduleDirPath, '.%s%s' % (username, mg.LASTDAY_CACHE_FILE))
 
     # Absolute pathnames of consumption files by interval
-    for interval in ['30MIN', 'JOUR', 'MOIS', 'ANNEE']:
+    for interval in ['JOUR', 'MOIS', 'ANNEE']:  # Avoid '30MIN'
         mg.consumptionFilesDict[interval] = os.path.join(mg.moduleDirPath, '.consumption-by-%s.csv' % (interval))
 
     # Let's go

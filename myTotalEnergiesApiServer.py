@@ -64,12 +64,14 @@ def foreverLoop(loop_on, dataCachePath, debug, updateDelay, updateTime):
         if loop_on.value == True:
             #time.sleep(updateDelay)
             sleepUntil(updateTime) # Sets the time to sleep until. "09:30AM"
-            myprint(0, 'Reloading cache file from server...')
+            dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            myprint(0, 'Reloading cache file from server at %s...' % (dt_now))
             res = mtec.getContractsInfoFromTotalEnergiesServer(dataCachePath)
             if res:
                 myprint(0, 'Failed to create/update local data cache')
-            dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-            myprint(0, '%s: Data collected from server' % (dt_now))            
+                #continue
+            else:
+                myprint(0, 'Data collected from server at %s' % (dt_now))            
 
 
 def apiServerMain():

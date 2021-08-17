@@ -196,6 +196,10 @@ def getContractsInfoFromTotalEnergiesServer(dataCachePath):
         # Work done. Logout from server
         te.logout()
 
+    if 'ErRoR' in info:
+        myprint(1, 'Error retrieving information from TotalEnergies server')
+        return -1
+   
     #myprint(1, type(info), len(info))
     print(json.dumps(info, indent=4))
     
@@ -204,11 +208,9 @@ def getContractsInfoFromTotalEnergiesServer(dataCachePath):
     if not bydays:
         myprint(1, 'Unable to parse %s' % (mg.consumptionFilesDict['JOUR']))
     else:
-        # dt = datetime.strptime(date, '%d/%m/%Y').strftime('%Y-%m-%d')
         # Re-write dates
         firstDate = datetime.strptime(bydays['date'][0], '%Y-%m-%d').strftime('%d/%m/%Y')
         lastDate  = datetime.strptime(bydays['date'][-1], '%Y-%m-%d').strftime('%d/%m/%Y')
-        #lastDate  = bydays['date'][-1]
         outFilePath = generateConsumptionChart(bydays, interval='Day', opt='(%s - %s)' % (firstDate, lastDate))
         if not outFilePath:
             myprint(0, 'Failed to create plot chart (by day)')
@@ -225,11 +227,12 @@ def getContractsInfoFromTotalEnergiesServer(dataCachePath):
         if not outFilePath:
             myprint(0, 'Failed to create plot chart (by month)')
         
-
     # Update data cache
     res = dumpJsonToFile(dataCachePath, info)
     if res:
         myprint(1, 'Failed to update local data cache')
-        return (res)
-
+    return res
     #saveLastLineOfConsFiles()
+
+    
+
