@@ -451,7 +451,9 @@ def generateConsumptionChart(d, interval, opt=''):
     df = pd.DataFrame(d)
     #print (df)
 
-    df.plot(x="date", y="cons", kind='bar', xlabel='')
+    #my_colors = [(x/10.0, x/20.0, 0.75) for x in range(len(df))] # <-- Quick gradient example
+    my_colors = ['C0', 'C1', 'C2', 'C3', 'C4']    
+    df.plot(x="date", y="cons", kind='bar', xlabel='', color=my_colors)
     
     # Clear out odd xticks to increase readibility
     xticks = d['date']
@@ -459,7 +461,8 @@ def generateConsumptionChart(d, interval, opt=''):
     #print(xticks)
     plt.xticks(range(0,len(xticks)), xticks)
 
-    plt.title('Consumption by %s %s' % (interval,opt))
+    #plt.title('Consumption by %s %s' % (interval,opt))
+    plt.gcf().suptitle('Consumption by %s %s' % (interval,opt), fontsize=16)
     #plt.legend(["kWh"])
     plt.gcf().autofmt_xdate(rotation=25.0)
 
@@ -467,8 +470,9 @@ def generateConsumptionChart(d, interval, opt=''):
     avg = sum(d['cons']) / len(d['cons'])
     avghline = plt.axhline(avg, color='red', ls='--')
 
-    blue_patch = mpatches.Patch(color='blue', label='kWh')
-    plt.legend([blue_patch, avghline], ["kWh", "Average (%.1f)" % (avg)])
+    #blue_patch = mpatches.Patch(color='blue', label='kWh')
+    #plt.legend([blue_patch, avghline], ["kWh", "Average (%.1f)" % (avg)])
+    plt.legend([avghline], ["Average (%.1f)" % (avg)])
     
     #plt.show()
     outputFile = os.path.join(mg.moduleDirPath, 'consumption-by-%s.png' % (interval))
