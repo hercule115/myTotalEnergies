@@ -309,12 +309,136 @@ def computeConsumptionByDays():
 
 
 ####
+# Parse input row. If an error is detected in the 'date' fields, then check in the next row
+def parseRow(row, hack):
+    myprint(1, f'Parsing row: {row}. hack={hack}')
+
+    output = list()
+    
+    # Parse row
+    # Example: Électricité;09/2018;09/2018;"101 kWh"
+
+    rowAsList = row[0].split(';')
+    resource  = rowAsList[0]    # not used
+    fullDate0AsString = rowAsList[1]
+    fullDate1AsString = rowAsList[2]
+
+    dateAsString = fullDate0AsString[:7]
+    month  = dateAsString[:2]
+    year   = dateAsString[3:]
+    longDate = datetime.strptime(dateAsString, '%m/%Y').strftime('%B %Y')
+
+    consAsString = rowAsList[3].replace('"','')
+    cons = int(consAsString.split(' ')[0])
+    unit = consAsString.split(' ')[1]
+
+    # If a hack is provided, it contains the previous row data
+    if hack:
+        isError = False
+        
+        myprint(1, 'Checking current row with previous record (hack)')
+
+        month_hack = hack[1]
+        year_hack  = hack[2]
+
+        if int(month_hack)+1 == int(month) and int(year_hack) == int(year):
+            # Must return 2 items (one with info from hack and one for current row)
+            # Compute average between 'cons' fields and update both fields
+            avg_cons = int((hack[4] + cons) / 2)
+            hack[4] = avg_cons
+            output.append(hack)
+            output.append([dateAsString, month, year, longDate, avg_cons, unit])
+            
+    elif fullDate0AsString != fullDate1AsString:
+        myprint(1, f'Warning: Invalid input row (malformed dates): {row}')
+        
+        isError = True
+            
+        dts0 = datetime.strptime(fullDate0AsString, '%m/%Y')
+        dts1 = datetime.strptime(fullDate1AsString, '%m/%Y')
+        
+        dm = diff_month(dts1, dts0)
+        if dm > 1:
+            myprint(1, f'Skipping malformed input row: {row}')
+        elif dm == 1:
+            myprint(1, f'One Month difference detected between {dts0} and {dts1}. Creating hack record')
+            hack = [dateAsString, month, year, longDate, cons, unit]
+            output.append(hack)
+    else:
+        isError = False
+        # Return single item for current row
+        output.append([dateAsString, month, year, longDate, cons, unit])
+
+    return isError, output
+    
+
+def oparseRow(row, hack):
+    myprint(1, f'Parsing row: {row}. hack={hack}')
+
+    output = list()
+    
+    # Parse row
+    # Example: Électricité;09/2018;09/2018;"101 kWh"
+
+    rowAsList = row[0].split(';')
+    resource  = rowAsList[0]    # not used
+    fullDate0AsString = rowAsList[1]
+    fullDate1AsString = rowAsList[2]
+
+    dateAsString = fullDate0AsString[:7]
+    month  = dateAsString[:2]
+    year   = dateAsString[3:]
+    longDate = datetime.strptime(dateAsString, '%m/%Y').strftime('%B %Y')
+
+    consAsString = rowAsList[3].replace('"','')
+    cons = int(consAsString.split(' ')[0])
+    unit = consAsString.split(' ')[1]
+    
+    if hack:
+        isError = False
+        
+        myprint(1, 'Checking current row with hack')
+
+        month_hack = hack[1]
+        year_hack  = hack[2]
+        print(month,month_hack,year,year_hack)
+        if int(month_hack)+1 == int(month) and int(year_hack) == int(year):
+            # Must return 2 items (one with info from hack and one for current row)
+            # Compute average between 'cons' fields and update both fields
+            avg_cons = int((hack[4] + cons) / 2)
+            hack[4] = avg_cons
+            output.append(hack)
+            output.append([dateAsString, month, year, longDate, avg_cons, unit])
+            
+    elif fullDate0AsString != fullDate1AsString:
+        myprint(1, f'Invalid input row (malformed dates): {row}')
+        
+        isError = True
+        
+        dts0 = datetime.strptime(fullDate0AsString, '%m/%Y')
+        dts1 = datetime.strptime(fullDate1AsString, '%m/%Y')
+        
+        dm = diff_month(dts1, dts0)
+        if dm > 1:
+            myprint(1, 'Skipping malformed input: %s' % (row))
+        elif dm == 1:
+            myprint(1, f'One Month difference detected between {dts0} and {dts1}. Creating hack')
+            hack = [dateAsString, month, year, longDate, cons, unit]
+            output.append(hack)
+    else:
+        isError = False
+        # Return single item for current row
+        output.append([dateAsString, month, year, longDate, cons, unit])
+
+    return isError, output
+
+####
 def parseConsumptionByMonths():
-    # Parse consumption-by-MOIS.csv data file
+    # Parse .consumption-by-MOIS.csv data file
 
     inputFile = mg.consumptionFilesDict['MOIS']
     if not os.path.isfile(inputFile):
-        myprint(0, '%s consumption file does not exist' % (inputFile))
+        myprint(0, f'{inputFile} consumption file does not exist')
         return {}
 
     myprint(1, f'Parsing file: {inputFile}')
@@ -332,32 +456,61 @@ def parseConsumptionByMonths():
             fullmonths['longDate'] = list()
             fullmonths['unit'] = list()
 
+            hack = None	# Used to store invalid input row
+
+            for row in csvReader:
+                isError, records = parseRow(row, hack)
+                if isError == True:
+                    hack = records[0]	# Save our hack record to be used in the next loop
+                    continue
+
+                # Update list ofrecords
+                for item in records:
+                    dateAsString = item[0]
+                    month        = item[1]
+                    year         = item[2]
+                    longDate     = item[3]
+                    cons         = item[4]
+                    unit         = item[5]
+
+                    myprint(1, f'Adding: {dateAsString} {month} {year} {longDate} {cons} {unit}')
+                    
+                    # Add this record to output dict
+                    fullmonths['date'].append(dateAsString)
+                    fullmonths['month'].append(month)
+                    fullmonths['year'].append(year)
+                    fullmonths['longDate'].append(longDate)
+                    fullmonths['cons'].append(cons)
+                    fullmonths['unit'].append(unit)
+
+                hack = None
+            
             # Iterate over each row in the csv using reader object
             # Example: Électricité;09/2018;09/2018;"101 kWh"
-            for row in csvReader:
-                rowAsList = row[0].split(';')
+            # for row in csvReader:
+            #     rowAsList = row[0].split(';')
 
-                fullDate0AsString = rowAsList[1]
-                fullDate1AsString = rowAsList[2]
-                if fullDate0AsString != fullDate1AsString:
-                    myprint(1, 'Skipping malformed input: %s' % (row))
-                    continue
-                dateAsString = fullDate0AsString[:7] # %m/%Y
-                consAsString = rowAsList[3].replace('"','')
-                cons = int(consAsString.split(' ')[0])
-                unit = consAsString.split(' ')[1]
+            #     fullDate0AsString = rowAsList[1]
+            #     fullDate1AsString = rowAsList[2]
+            #     if fullDate0AsString != fullDate1AsString:
+            #         myprint(1, 'Skipping malformed input: %s' % (row))
+            #         continue
+            #     dateAsString = fullDate0AsString[:7] # %m/%Y
+            #     consAsString = rowAsList[3].replace('"','')
+            #     cons = int(consAsString.split(' ')[0])
+            #     unit = consAsString.split(' ')[1]
 
-                month  = dateAsString[:2]
-                year   = dateAsString[3:]
-                longDate = datetime.strptime(dateAsString, '%m/%Y').strftime('%B %Y')
+            #     month  = dateAsString[:2]
+            #     year   = dateAsString[3:]
+            #     longDate = datetime.strptime(dateAsString, '%m/%Y').strftime('%B %Y')
 
-                # Add this record to output dict
-                fullmonths['date'].append(dateAsString)
-                fullmonths['month'].append(month)
-                fullmonths['year'].append(year)
-                fullmonths['longDate'].append(longDate)
-                fullmonths['cons'].append(cons)
-                fullmonths['unit'].append(unit)
+            #     # Add this record to output dict
+            #     fullmonths['date'].append(dateAsString)
+            #     fullmonths['month'].append(month)
+            #     fullmonths['year'].append(year)
+            #     fullmonths['longDate'].append(longDate)
+            #     fullmonths['cons'].append(cons)
+            #     fullmonths['unit'].append(unit)
 
     except:
         myprint(0, 'ERROR while parsing input file')
@@ -378,7 +531,7 @@ def computeTotalConsumption():
 def computeConsumptionByMonths():
     consumptionByMonths, totalConsumption = parseConsumptionByMonths()
     
-    # Parse consumption-by-MOIS.csv data file
+    # Parse .consumption-by-MOIS.csv data file
 
     # inputFile = mg.consumptionFilesDict['MOIS']
     # if not os.path.isfile(inputFile):

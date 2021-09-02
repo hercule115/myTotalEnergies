@@ -167,7 +167,7 @@ def saveLastLineOfConsFiles():
     
 # Get contract(s) info from SOSH Server and update the local cache file
 def getContractsInfoFromTotalEnergiesServer(dataCachePath):
-    myprint(2, 'Connecting to TOTAL ENERGIES Server')
+    myprint(2, 'Connecting to TotalEnergies Server')
     
     username, password = authinfo.decodeKey(config.TE_AUTH.encode('utf-8'))
 
