@@ -91,63 +91,58 @@ def loadDataFromCacheFile(dataCachePath):
 ####
 def getContractsInfo(contract):
 
-    myprint(1, 'Looking for contract: %s%s%s' % (color.BOLD, contract, color.END))
-
-    # Dict to contain all information for all contracts
-    consumptionDict = dict()
+    myprint(1, f'Looking for contract: %s{contract}%s' % (color.BOLD, color.END))
 
     allContracts = getDataFromCache()
-    
-    if config.VERBOSE:
-        if contract == 'all':
-            myprint(0, 'Showing all contracts')
-            return(allContracts)
-        elif contract in allContracts:
-            myprint(1, 'Contract %s FOUND' % contract)
-            return(allContracts[contract])
-        else:
-            myprint(1, 'Contract %s NOT FOUND' % contract)
-            return {}
-    
-    # Compact mode
 
-    outputDict = dict()
-    myprint(1, 'Generating outputDict for "contract" %s' % (contract))
+    if contract == 'all':
+        myprint(1, 'Returning all info for all contracts')
+        return allContracts
+    else:
+        # Single contract requested
+        outputDict = dict()
+        myprint(1, f'Generating outputDict for contract: {contract}')
 
-    # Single contract requested
-    if not contract in allContracts:
-        return outputDict # empty dict
+        if not contract in allContracts:
+            return outputDict # empty dict
         
-    oneContract = allContracts[contract]
+        oneContract = allContracts[contract]
 
-    if config.MONTHS:
-        # Show information about months
-        try:
-            outputDict = oneContract['consByMonths']
-        except:
-            myprint(1, 'No consumption')
-            outputDict = {}
-        #print(json.dumps(outputDict, ensure_ascii=False))
-        return outputDict
+        if config.VERBOSE:
+            # Return all info for this contract
+            return oneContract
 
-    if config.DAYS:
-        # Show information about days
-        try:
-            outputDict = oneContract['consByDays']
-        except:
-            myprint(1, 'No consumption')
-            outputDict = {}
-        #print(json.dumps(outputDict, ensure_ascii=False))
-        return outputDict
+        if config.MONTHS:
+            # Show information about months only
+            try:
+                outputDict = oneContract['consByMonths']
+            except:
+                myprint(1, 'No "consByMonths" entry found')
+                outputDict = {}
+            #print(json.dumps(outputDict, ensure_ascii=False))
+            return outputDict
 
-    # Show total consumption information
-    try:
-        outputDict = oneContract['powerCons']
-    except:
-        myprint(1, 'No consumption')
-        outputDict = {}
-    return(outputDict)
-    
+        if config.DAYS:
+            # Show information about days only
+            try:
+                outputDict = oneContract['consByDays']
+            except:
+                myprint(1, 'No "consByDays" entry found')
+                outputDict = {}
+            #print(json.dumps(outputDict, ensure_ascii=False))
+            return outputDict
+
+        if config.TOTAL:
+            # Show total consumption information
+            try:
+                outputDict = oneContract['powerCons']
+            except:
+                myprint(1, 'No "powerCons" entry found')
+                outputDict = {}
+            #print(json.dumps(outputDict, ensure_ascii=False))
+            return outputDict
+
+        return {}	# return empty dict if no option is set
 
 def saveLastLineOfConsFiles():
     dtNow = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
@@ -220,7 +215,7 @@ def getContractsInfoFromTotalEnergiesServer(dataCachePath):
     if not bymonths:
         myprint(1, 'Unable to parse %s' % (mg.consumptionFilesDict['MOIS']))
     else:
-        #print(json.dumps(bymonths, indent=4))
+        print(json.dumps(bymonths, indent=4))
         firstDate = bymonths['date'][0]
         lastDate  = bymonths['date'][-1]
         outFilePath = generateConsumptionChart(bymonths, interval='Month', opt='(%s - %s)' % (firstDate, lastDate))

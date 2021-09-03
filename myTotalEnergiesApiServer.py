@@ -16,7 +16,7 @@ from common.utils import myprint, isFileOlderThanXMinutes, sleepUntil
 
 import myTotalEnergiesContracts as mtec
 
-from resources.days import DaysAPI, LastDayAPI, LastDaySimAPI, DaysChartAPI
+from resources.days import DaysAPI, LastDayAPI, DaysChartAPI
 from resources.months import MonthsAPI, LastMonthAPI, MonthsChartAPI, Last6MonthsAPI
 from resources.misc import TotalAPI
 
@@ -27,7 +27,6 @@ apiResources = {
     "days" : [
         (DaysAPI,       '/myte/api/v1.0/days/<string:id>',    'days'),
         (LastDayAPI,    '/myte/api/v1.0/lastday/<string:id>', 'lastday'),
-        (LastDaySimAPI, '/myte/api/v1.0/lastdaysim/<string:id>', 'lastdaysim'),
         (DaysChartAPI,  '/myte/api/v1.0/dayschart/<string:id>', 'dayschart')        
         ],
     "months" : [

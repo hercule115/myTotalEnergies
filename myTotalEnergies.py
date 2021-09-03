@@ -28,7 +28,7 @@ import sys
 import time
 
 import myGlobals as mg
-from common.utils import myprint, module_path, get_linenumber, color
+from common.utils import myprint, module_path, get_linenumber, color, dumpContractInformation
 
 import authinfo		# Encode/Decode credentials
 import myTotalEnergiesContracts as mtec
@@ -89,7 +89,7 @@ def parse_argv():
                         action="store_true", dest="days", default=False,
                         help="shows information by day")
     parser.add_argument("--total",
-                        action="store_true", dest="total", default=True,
+                        action="store_true", dest="total", default=False,
                         help="shows information about total consumption")
 
     # Credentials arguments    
@@ -162,6 +162,7 @@ def main():
                 'config.USE_CACHE =', config.USE_CACHE,
                 'config.DAYS =',      config.DAYS,
                 'config.MONTHS =',    config.MONTHS,
+                'config.TOTAL =',    config.TOTAL,
         )
         
     if args.logFile == None:
@@ -214,22 +215,25 @@ def main():
     if config.USE_CACHE:
         # Load data from local cache
         info = mtec.getContractsInfo(contract)
-        if config.VERBOSE:
-            for k,v in info.items():
-                oneContract = v
-                print('%s%s%s' % (color.BOLD, k, color.END))
-                print(json.dumps(oneContract, indent=4, ensure_ascii=False))
-        else:
-            #print(json.dumps(info, ensure_ascii=False))
-            lastItem = sorted(info.items(), key=lambda kv: kv[0])[-1]
-            myprint(1,'Last Item:',lastItem)            
-            o = {
-                "date"      : lastItem[0],
-                "value"     : lastItem[1][0],
-                "unit"      : lastItem[1][1],
-                "friendlyDate" : lastItem[1][2],
-            }
-            print(json.dumps(o, ensure_ascii=False))
+        #print(json.dumps(info, indent=4, ensure_ascii=False))
+        
+        #if config.VERBOSE:
+            # for k,v in info.items():
+            #     oneContract = v
+            #     print('%s%s%s' % (color.BOLD, k, color.END))
+            #     print(json.dumps(oneContract, indent=4, ensure_ascii=False))
+
+        dumpContractInformation(contract, info) #k, v) #, type='all')
+
+        #    lastItem = sorted(info.items(), key=lambda kv: kv[0])[-1]
+            #myprint(1,'Last Item:',lastItem)            
+         #   o = {
+         #       "date"      : lastItem[0],
+         #       "value"     : lastItem[1][0],
+         #       "unit"      : lastItem[1][1],
+         #       "friendlyDate" : lastItem[1][2],
+         #   }
+         #   print(json.dumps(o, ensure_ascii=False))
         sys.exit(0)
 
     # Read data from TotalEnergies webserver
@@ -245,19 +249,26 @@ def main():
     # Display information
     info = mtec.getContractsInfo(contract)
     
-    if config.VERBOSE:
-        print(json.dumps(info, indent=4, ensure_ascii=False))
-    else:
-        myprint(0,json.dumps(info, ensure_ascii=False))
-        lastItem = sorted(info.items(), key=lambda kv: kv[0])[-1]
-        myprint(1,'Last Item:',lastItem)
-        o = {
-            "date"      : lastItem[0],
-            "value"     : lastItem[1][0],
-            "unit"      : lastItem[1][1],
-            "friendlyDate" : lastItem[1][2],
-        }
-        print(json.dumps(o, indent=4, ensure_ascii=False))
+    # if config.VERBOSE:
+    #     # Dump all information
+    #     print(json.dumps(info, indent=4, ensure_ascii=False))
+    # else:
+    #     # Dump 'powerCons' information only
+    #     for k,v in info.items():
+    #         dumpContractInformation(k, v, type='powerCons')
+    #     myprint(0, 'Retrieving last item', json.dumps(info, ensure_ascii=False))
+    #     lastItem = sorted(info.items(), key=lambda kv: kv[0])[-1]
+    #     myprint(1,'Last Item:',lastItem)
+    #     o = {
+    #         "date"      : lastItem[0],
+    #         "value"     : lastItem[1][0],
+    #         "unit"      : lastItem[1][1],
+    #         "friendlyDate" : lastItem[1][2],
+    #     }
+    #     print(json.dumps(o, indent=4, ensure_ascii=False))
+
+    dumpContractInformation(contract, info)
+
         
     if args.logFile and args.logFile != '':
         sys.stdout.close()

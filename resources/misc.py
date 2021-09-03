@@ -47,21 +47,11 @@ class TotalAPI(Resource):
         # Set config.DAYS and config.MONTHS as False to get total consumption information
         config.DAYS   = False
         config.MONTHS = False
+        config.TOTAL  = True        
 
     def get(self, id):
         info = mtec.getContractsInfo(id)
-        myprint(1,'*** TotalAPI get() ***')
         myprint(1, json.dumps(info, ensure_ascii=False))        
-
-        # "powerCons": {
-        #     "totalConsumptionDate": "01/08/2021",
-        #     "totalConsumptionVol": "7606",
-        #     "totalConsumptionUnit": "kWh",
-        #     "lastMeasurementDate": "01/07/2021",
-        #     "lastMeasurementVol": "301",
-        #     "lastMeasurementUnit": "kWh"
-        # }
-
         outputDict = {
             "date"   : info['totalConsumptionDate'],
             "value"  : info['totalConsumptionVol'],

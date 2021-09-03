@@ -47,8 +47,9 @@ class DaysAPI(Resource):
     decorators = [auth.login_required]
 
     def __init__(self):
-        config.DAYS = True
+        config.DAYS   = True
         config.MONTHS = False
+        config.TOTAL  = False
         
     def get(self, id):
         info = mtec.getContractsInfo(id)
@@ -66,8 +67,9 @@ class LastDayAPI(Resource):
     decorators = [auth.login_required]
 
     def __init__(self):
-        config.DAYS = True
+        config.DAYS   = True
         config.MONTHS = False
+        config.TOTAL  = False
         
     def get(self, id):
         info = mtec.getContractsInfo(id)
@@ -81,51 +83,7 @@ class LastDayAPI(Resource):
             "unit"      : lastItem[1][1],
             "friendlyDate" : lastItem[1][2],
         }
-        # Check if this record has been already provided. In this case, skip it
-        # if os.path.isfile(mg.lastDayCachePath):
-        #     with open(mg.lastDayCachePath, "r") as f:
-        #         oo = f.readline()
-        #     myprint(1, 'Last Item dispatched from cache: %s' % (oo))
-        #     if str(o) == oo:
-        #         myprint(1, 'Last item already dispatched. Skipping output')
-        #         return {}
-        #     else:
-        #         myprint(1, 'Updating last item dispatched: %s' % (o))
-        #         f.write(str(o))
-        #         return o
-        # else:
-        #     with open(mg.lastDayCachePath, "w") as f:
-        #         f.write(str(o))
-        #     myprint(1, '%s cache file created' % (mg.lastDayCachePath))
-        #     return o
         return outputDict
-    
-    def post(self):
-        pass
-
-
-class LastDaySimAPI(Resource):
-    decorators = [auth.login_required]
-
-    def __init__(self):
-        config.DAYS = True
-        config.MONTHS = False
-        random.seed()
-        self.dtNow = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-        myprint(1, 'Now: %s' % (self.dtNow))
-        
-    def get(self, id):
-        date = datetime.strptime(self.dtNow, "%Y/%m/%d %H:%M:%S").strftime('%m/%d/%Y')
-        longDate = datetime.strptime(self.dtNow, "%Y/%m/%d %H:%M:%S").strftime('%A, %B %d %Y')
-
-        o = {
-            "date"      : date,
-            "value"     : random.randrange(100,700),
-            "unit"      : "kWh",
-            "friendlyDate" : longDate
-        }
-        myprint(1, o)
-        return o
     
     def post(self):
         pass
@@ -137,14 +95,26 @@ class DaysChartAPI(Resource):
     def __init__(self):
         config.DAYS   = True
         config.MONTHS = False
+        config.TOTAL  = False
 
     def get(self, id):
-        info = computeConsumptionByDays()
-        firstDate = info['date'][0]
-        lastDate  = info['date'][-1]
-        #print(len(days['date']),firstDate,lastDate)
-        outFilePath = generateConsumptionChart(info, interval='Day', opt='(%s / %s)' % (firstDate, lastDate))
+        # info = computeConsumptionByDays()
+        # firstDate = info['date'][0]
+        # lastDate  = info['date'][-1]
+        # #print(len(days['date']),firstDate,lastDate)
+        # outFilePath = generateConsumptionChart(info, interval='Day', opt='(%s / %s)' % (firstDate, lastDate))
 
+        bydays = computeConsumptionByDays()
+        if not bydays:
+            myprint(1, f'Unable to parse {mg.consumptionFilesDict["JOUR"]}')
+            return
+        # Re-write dates
+        firstDate = datetime.strptime(bydays['date'][0], '%Y-%m-%d').strftime('%d/%m/%Y')
+        lastDate  = datetime.strptime(bydays['date'][-1], '%Y-%m-%d').strftime('%d/%m/%Y')
+        outFilePath = generateConsumptionChart(bydays, interval='Day', opt='(%s - %s)' % (firstDate, lastDate))
+        if not outFilePath:
+            myprint(0, 'Failed to create plot chart (by day)')
+            
     def put(self, id):
         pass
 

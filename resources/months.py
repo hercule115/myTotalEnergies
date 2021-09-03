@@ -47,11 +47,24 @@ class MonthsChartAPI(Resource):
     def __init__(self):
         config.DAYS   = False
         config.MONTHS = True
+        config.TOTAL  = False
 
     def get(self, id):
-        info = computeConsumptionbyMonths()
-        outFilePath = generateConsumptionChart(info, 'Month')
+        #info = computeConsumptionByMonths()
+        #outFilePath = generateConsumptionChart(info, interval='Month')
 
+        bymonths = computeConsumptionByMonths()
+        if not bymonths:
+            myprint(1, f'Unable to parse {mg.consumptionFilesDict["MOIS"]}')
+            return
+
+        #print(json.dumps(bymonths, indent=4))
+        firstDate = bymonths['date'][0]
+        lastDate  = bymonths['date'][-1]
+        outFilePath = generateConsumptionChart(bymonths, interval='Month', opt='(%s - %s)' % (firstDate, lastDate))
+        if not outFilePath:
+            myprint(0, 'Failed to create plot chart (by month)')
+            
     def put(self, id):
         pass
 
@@ -65,6 +78,7 @@ class Last6MonthsAPI(Resource):
     def __init__(self):
         config.DAYS   = False
         config.MONTHS = True
+        config.TOTAL  = False
 
     def get(self, id):
         info = mtec.getContractsInfo(id)
@@ -97,13 +111,13 @@ class Last6MonthsAPI(Resource):
         pass
     
     
-
 class MonthsAPI(Resource):
     decorators = [auth.login_required]
 
     def __init__(self):
         config.DAYS   = False
         config.MONTHS = True
+        config.TOTAL  = False
 
     def get(self, id):
         info = mtec.getContractsInfo(id)
@@ -123,6 +137,7 @@ class LastMonthAPI(Resource):
     def __init__(self):
         config.DAYS = False
         config.MONTHS = True
+        config.TOTAL  = False
 
     def get(self, id):
         info = mtec.getContractsInfo(id)
@@ -130,30 +145,13 @@ class LastMonthAPI(Resource):
         # Get last record (e.g. last day in report)
         lastItem = sorted(info.items(), key=lambda kv: kv[0])[-1]
         myprint(1,'Last Item:',lastItem)
-        o = {
+        outputDict = {
             "date"  : lastItem[0],
             "value" : lastItem[1][0],
             "unit"  : lastItem[1][1],
             "friendlyDate" : lastItem[1][2],
         }
-        # Check if this record has been already provided. In this case, skip it
-        # if os.path.isfile(mg.lastDayCachePath):
-        #     with open(mg.lastDayCachePath, "r") as f:
-        #         oo = f.readline()
-        #     myprint(1, 'Last Item dispatched from cache: %s' % (oo))
-        #     if str(o) == oo:
-        #         myprint(1, 'Last item already dispatched. Skipping output')
-        #         return {}
-        #     else:
-        #         myprint(1, 'Updating last item dispatched: %s' % (o))
-        #         f.write(str(o))
-        #         return o
-        # else:
-        #     with open(mg.lastDayCachePath, "w") as f:
-        #         f.write(str(o))
-        #     myprint(1, '%s cache file created' % (mg.lastDayCachePath))
-        #     return o
-        return o
+        return outputDict
     
     def post(self):
         pass

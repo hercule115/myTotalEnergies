@@ -660,5 +660,13 @@ def sleepUntil(sleep_until):
 
 ####
 def diff_month(d1, d2):
-    print(d1.year,d2.year,d1.month,d2.month)
+    #print(d1.year,d2.year,d1.month,d2.month)
     return (d1.year - d2.year) * 12 + d1.month - d2.month
+
+
+####
+def dumpContractInformation(contract, info): #(contract, info): #, type='all'):
+    if config.VERBOSE:
+        print('Contract N°: %s%s%s' % (color.BOLD, contract, color.END))
+
+    print(json.dumps(info, indent=4, ensure_ascii=False))
