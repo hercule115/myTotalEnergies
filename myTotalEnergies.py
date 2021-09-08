@@ -32,6 +32,7 @@ from common.utils import myprint, module_path, get_linenumber, color, dumpContra
 
 import authinfo		# Encode/Decode credentials
 import myTotalEnergiesContracts as mtec
+import myTotalEnergiesCosts as mtecosts
         
 # Arguments parser
 def parse_argv():
@@ -91,6 +92,9 @@ def parse_argv():
     parser.add_argument("--total",
                         action="store_true", dest="total", default=False,
                         help="shows information about total consumption")
+    parser.add_argument("--costs",
+                        action="store_true", dest="costs", default=False,
+                        help="download/shows information about kWH costs")
 
     # Credentials arguments    
     parser.add_argument('-u', '--user',
@@ -153,6 +157,7 @@ def main():
     config.DAYS      = args.days
     config.MONTHS    = args.months
     config.TOTAL     = args.total
+    config.COSTS     = args.costs
     
     if config.DEBUG:
         myprint(1, 'Running in DEBUG mode (level=%d)' % config.DEBUG)
@@ -162,7 +167,8 @@ def main():
                 'config.USE_CACHE =', config.USE_CACHE,
                 'config.DAYS =',      config.DAYS,
                 'config.MONTHS =',    config.MONTHS,
-                'config.TOTAL =',    config.TOTAL,
+                'config.TOTAL =',     config.TOTAL,
+                'config.COSTS =',     config.COSTS,
         )
         
     if args.logFile == None:
@@ -202,6 +208,25 @@ def main():
         myprint(1, 'myTotalEnergies API Server exited with code %d' % res)
         sys.exit(res)
         
+    #
+    # Standalone mode
+    #
+
+    if config.COSTS:
+        # Read tariffs from Prix-Elec.com server and update cache file
+        res = mtecosts.getTariffsInfoFromPrixElecServer(mg.costsDataCachePath)
+        if res:
+            myprint(0, 'Failed to get tariffs from prix-elec.com')
+            sys.exit(res)
+        myprint(0, f'{mg.costsDataCachePath} has been updated')
+        if config.VERBOSE:
+            # Show base costs... for various meter power
+            for power in ['3','6','9','12','15', '18']:
+                prices = mtecosts.getCostsFromCacheFile(power)
+                mtecosts.dumpCosts(power, prices)
+        # Exit 
+        sys.exit(0)
+    
     if not args.contract:
         contract = 'all'
     else:
@@ -223,18 +248,9 @@ def main():
             #     print('%s%s%s' % (color.BOLD, k, color.END))
             #     print(json.dumps(oneContract, indent=4, ensure_ascii=False))
 
-        dumpContractInformation(contract, info) #k, v) #, type='all')
-
-        #    lastItem = sorted(info.items(), key=lambda kv: kv[0])[-1]
-            #myprint(1,'Last Item:',lastItem)            
-         #   o = {
-         #       "date"      : lastItem[0],
-         #       "value"     : lastItem[1][0],
-         #       "unit"      : lastItem[1][1],
-         #       "friendlyDate" : lastItem[1][2],
-         #   }
-         #   print(json.dumps(o, ensure_ascii=False))
+        dumpContractInformation(contract, info)
         sys.exit(0)
+
 
     # Read data from TotalEnergies webserver
     res = mtec.getContractsInfoFromTotalEnergiesServer(mg.dataCachePath)
@@ -248,27 +264,7 @@ def main():
 
     # Display information
     info = mtec.getContractsInfo(contract)
-    
-    # if config.VERBOSE:
-    #     # Dump all information
-    #     print(json.dumps(info, indent=4, ensure_ascii=False))
-    # else:
-    #     # Dump 'powerCons' information only
-    #     for k,v in info.items():
-    #         dumpContractInformation(k, v, type='powerCons')
-    #     myprint(0, 'Retrieving last item', json.dumps(info, ensure_ascii=False))
-    #     lastItem = sorted(info.items(), key=lambda kv: kv[0])[-1]
-    #     myprint(1,'Last Item:',lastItem)
-    #     o = {
-    #         "date"      : lastItem[0],
-    #         "value"     : lastItem[1][0],
-    #         "unit"      : lastItem[1][1],
-    #         "friendlyDate" : lastItem[1][2],
-    #     }
-    #     print(json.dumps(o, indent=4, ensure_ascii=False))
-
     dumpContractInformation(contract, info)
-
         
     if args.logFile and args.logFile != '':
         sys.stdout.close()
@@ -291,8 +287,11 @@ if __name__ == "__main__":
     # Absolute pathname of data cache file
     mg.dataCachePath = os.path.join(mg.moduleDirPath, '.%s%s' % (username, mg.DATA_CACHE_FILE))
 
+    # Absolute pathname of costs data cache file
+    mg.costsDataCachePath = os.path.join(mg.moduleDirPath, '.%s' % (mg.COSTS_DATA_CACHE_FILE))
+    
     # Absolute pathname of lastday cache file
-    mg.lastDayCachePath = os.path.join(mg.moduleDirPath, '.%s%s' % (username, mg.LASTDAY_CACHE_FILE))
+    #mg.lastDayCachePath = os.path.join(mg.moduleDirPath, '.%s%s' % (username, mg.LASTDAY_CACHE_FILE))
 
     # Absolute pathnames of consumption files by interval
     for interval in ['JOUR', 'MOIS', 'ANNEE']:  # Avoid '30MIN'

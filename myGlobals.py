@@ -1,13 +1,14 @@
 # Some glogal constants
-VERSION = '1.0'
+VERSION = '1.5'
 DATA_CACHE_FILE = '.contracts.json'
-LASTDAY_CACHE_FILE = '.lastday.json'
+COSTS_DATA_CACHE_FILE = 'prix-elec-te.json'
+#LASTDAY_CACHE_FILE = '.lastday.json'
 
 # Global variables
 logger = None
 moduleDirPath = ''
 dataCachePath = ''
-lastDayCachePath = ''
+#lastDayCachePath = ''
 contractsInfo = None
 prevModTime = 0
 allContracts = {}

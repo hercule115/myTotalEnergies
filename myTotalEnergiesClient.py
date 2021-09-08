@@ -9,6 +9,7 @@ import sys
 import unicodedata
 
 from common.utils import myprint, dumpToFile, findBetween, lastLineFromConsumptionFile, parseConsumptionData, diff_month, parseRow
+import httpHeaders as hh
 import myGlobals as mg
 import authinfo
 import config
@@ -563,7 +564,7 @@ class TotalEnergies:
         myprint(1, 'Executing request "%s": %s' % (name, rqst["info"]))
         myprint(2, json.dumps(rqst, indent=4))
 
-        hdrs = Headers()
+        hdrs = hh.HttpHeaders()
 
         for k,v in rqst["rqst"]["headers"].items():
             if k == "Cookie":

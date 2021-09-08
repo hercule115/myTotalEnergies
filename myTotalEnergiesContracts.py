@@ -144,6 +144,7 @@ def getContractsInfo(contract):
 
         return {}	# return empty dict if no option is set
 
+
 def saveLastLineOfConsFiles():
     dtNow = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
     outputFile = os.path.join(mg.moduleDirPath, 'lastLinesOfConsFiles.txt')
@@ -159,7 +160,7 @@ def saveLastLineOfConsFiles():
             out.write('%s: %s: %s'% (interval,dtNow, ll))
         out.write('----\n')
 
-    
+
 # Get contract(s) info from SOSH Server and update the local cache file
 def getContractsInfoFromTotalEnergiesServer(dataCachePath):
     myprint(2, 'Connecting to TotalEnergies Server')
@@ -213,7 +214,7 @@ def getContractsInfoFromTotalEnergiesServer(dataCachePath):
     # (Re-)build months chart (last 12 months only)
     bymonths = computeConsumptionByMonths()
     if not bymonths:
-        myprint(1, 'Unable to parse %s' % (mg.consumptionFilesDict['MOIS']))
+        myprint(1, f'Unable to parse {mg.consumptionFilesDict['MOIS']}')
     else:
         print(json.dumps(bymonths, indent=4))
         firstDate = bymonths['date'][0]
@@ -227,7 +228,3 @@ def getContractsInfoFromTotalEnergiesServer(dataCachePath):
     if res:
         myprint(1, 'Failed to update local data cache')
     return res
-    #saveLastLineOfConsFiles()
-
-    
-
