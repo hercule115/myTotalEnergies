@@ -214,7 +214,7 @@ def getContractsInfoFromTotalEnergiesServer(dataCachePath):
     # (Re-)build months chart (last 12 months only)
     bymonths = computeConsumptionByMonths()
     if not bymonths:
-        myprint(1, f'Unable to parse {mg.consumptionFilesDict['MOIS']}')
+        myprint(1, 'Unable to parse %s' % (mg.consumptionFilesDict['MOIS']))
     else:
         print(json.dumps(bymonths, indent=4))
         firstDate = bymonths['date'][0]
