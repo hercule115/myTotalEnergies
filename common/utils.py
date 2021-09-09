@@ -222,7 +222,7 @@ def computeConsumptionByDays():
 ####
 # Parse input row. If an error is detected in the 'date' fields, then check in the next row
 def parseRow(row, hack):
-    myprint(1, f'Parsing row: {row}. hack={hack}')
+    myprint(2, f'Parsing row: {row}. hack={hack}')
 
     output = list()
     
@@ -324,7 +324,7 @@ def parseConsumptionByMonths():
                     cons         = item[4]
                     unit         = item[5]
 
-                    myprint(1, f'Adding: {dateAsString} {month} {year} {longDate} {cons} {unit}')
+                    myprint(2, f'Adding: {dateAsString} {month} {year} {longDate} {cons} {unit}')
                     
                     # Add this record to output dict
                     fullmonths['date'].append(dateAsString)

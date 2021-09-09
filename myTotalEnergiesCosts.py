@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from datetime import datetime
 import json
 import os
 import requests
@@ -97,8 +98,10 @@ class TotalEnergiesCosts:
                 myprint(2,'Cookie not modified:', cookie.name)                
 
     def _executeRequest(self, name):
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
         rqst = PRIX_ELEC_HTTP_REQUESTS[name]
-        myprint(1, 'Executing request "%s": %s' % (name, rqst["info"]))
+        myprint(1, '%s: Executing request "%s": %s' % (dt_now, name, rqst["info"]))
         myprint(2, json.dumps(rqst, indent=4))
 
         hdrs = hh.HttpHeaders()
