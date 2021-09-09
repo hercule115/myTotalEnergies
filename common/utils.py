@@ -380,7 +380,6 @@ def generateConsumptionChart(d, interval, opt=''):
     # Clear out odd xticks to increase readibility
     xticks = d['date']
     xticks[1::2] = [''] * math.floor(len(d['date'])/2)
-    #print(xticks)
     plt.xticks(range(0,len(xticks)), xticks)
 
     #plt.title('Consumption by %s %s' % (interval,opt))

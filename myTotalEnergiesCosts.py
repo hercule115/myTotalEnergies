@@ -203,6 +203,7 @@ class TotalEnergiesCosts:
         if rqst["returnText"]:
             return r.text
 
+
 ####        
 # Parse HTML file from prix-elec.com containing tariffs for TE
 def parseTariffsPage(html):
