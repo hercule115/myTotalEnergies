@@ -47,7 +47,8 @@ class TotalAPI(Resource):
         # Set config.DAYS and config.MONTHS as False to get total consumption information
         config.DAYS   = False
         config.MONTHS = False
-        config.TOTAL  = True        
+        config.MISCINFO = False
+        config.TOTAL  = True
 
     def get(self, id):
         info = mtec.getContractsInfo(id)
@@ -64,3 +65,34 @@ class TotalAPI(Resource):
 
     def delete(self, id):
         pass
+
+
+class MiscInfoAPI(Resource):
+    decorators = [auth.login_required]
+
+    def __init__(self):
+        # Set config.* to False but config.DATALAYER to get misc. info
+        config.DAYS   = False
+        config.MONTHS = False
+        config.TOTAL  = False
+        config.MISCINFO = True
+
+    def get(self, id):
+        info = mtec.getContractsInfo(id)
+        myprint(1, json.dumps(info, ensure_ascii=False))        
+        outputDict = {
+            "Offre"			: info['Offre'],
+            "PuissanceSouscrite"	: info['PuissanceSouscrite'],
+            "OptionTarifaire"		: info['OptionTarifaire'],
+            "NumeroCompteurELEC"	: info['NumeroCompteurELEC'],
+            "IDClient"			: info['IDClient'],
+            "PDL"			: info['PDL'],
+        }
+        return outputDict
+
+    def put(self, id):
+        pass
+
+    def delete(self, id):
+        pass
+    

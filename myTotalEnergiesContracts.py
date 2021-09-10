@@ -56,7 +56,10 @@ def buildAllContracts(rawInfo):
     
     miscInfo = dict()
     miscInfo['PDL']                      = dl['PDL']
+    miscInfo['Offre']                    = dl['Offre']
+    miscInfo["OptionTarifaire"]		 = dl['OptionTarifaire'],
     miscInfo['IDClient']                 = dl['IDClient']
+    miscInfo["NumeroCompteurELEC"]	 = dl['NumeroCompteurELEC'],
     miscInfo['PuissanceSouscrite']       = dl['PuissanceSouscrite']
     miscInfo['ElecProchaineReleveDate']  = dl['ElecProchaineReleveDate']
     miscInfo['ElecProchaineFactureDate'] = dl['ElecProchaineFactureDate']
@@ -107,7 +110,8 @@ def getContractsInfo(contract):
             return outputDict # empty dict
         
         oneContract = allContracts[contract]
-
+        #print(oneContract)
+        
         if config.VERBOSE:
             # Return all info for this contract
             return oneContract
@@ -142,6 +146,18 @@ def getContractsInfo(contract):
             #print(json.dumps(outputDict, ensure_ascii=False))
             return outputDict
 
+        #print(oneContract['dataLayer'])
+        
+        if config.MISCINFO:
+            # Show general contract information
+            try:
+                outputDict = oneContract['miscInfo']
+            except:
+                myprint(1, 'No "miscInfo" entry found')
+                outputDict = {}
+            #print(json.dumps(outputDict, ensure_ascii=False))
+            return outputDict
+        
         return {}	# return empty dict if no option is set
 
 
