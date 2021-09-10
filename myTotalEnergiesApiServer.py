@@ -18,7 +18,7 @@ import myTotalEnergiesContracts as mtec
 import myTotalEnergiesCosts as mtecosts
 
 from resources.days import DaysAPI, LastDayAPI
-from resources.months import MonthsAPI, LastMonthAPI
+from resources.months import MonthsAPI, LastMonthAPI, Last6MonthsAPI
 from resources.costs import BaseCostsAPI
 from resources.misc import TotalAPI
 
@@ -28,11 +28,12 @@ COSTS_DATACACHE_AGING_IN_MINUTES = 1440 # 1 full day
 apiResources = {
     "days" : [
         (DaysAPI,     '/myte/api/v1.0/days/<string:id>',    'days'),
-        (LastDayAPI,  '/myte/api/v1.0/lastday/<string:id>', 'lastday')
+        (LastDayAPI,  '/myte/api/v1.0/lastday/<string:id>', 'lastday'),
         ],
     "months" : [
         (MonthsAPI,     '/myte/api/v1.0/months/<string:id>',    'months'),
-        (LastMonthAPI,  '/myte/api/v1.0/lastmonth/<string:id>', 'lastmonth')
+        (LastMonthAPI,  '/myte/api/v1.0/lastmonth/<string:id>', 'lastmonth'),
+        (Last6MonthsAPI,  '/myte/api/v1.0/last6months/<string:id>', 'last6months'),
         ],
     "costs" : [
         (BaseCostsAPI, '/myte/api/v1.0/costs/base/<string:power>', 'basecosts'),
