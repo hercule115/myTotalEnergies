@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import jsonify, make_response
 from flask_restful import Api, Resource
 import json
@@ -17,7 +18,9 @@ class BaseCostsAPI(Resource):
         pass
     
     def get(self, power):
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         costs = mtecosts.getCostsFromCacheFile(power)
+        myprint(1, dt_now, json.dumps(costs, ensure_ascii=False))
         # Example:
         # yearly fee Base,  base,       yearly fee HC,  Cost HP,    Cost HC 
         # ['137.64€',       '0.1442€',  '145.83€',      '0.1678€',  '0.1263€']

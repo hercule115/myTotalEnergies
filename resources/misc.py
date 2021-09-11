@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import jsonify, make_response, url_for  # redirect, request, url_for, current_app, flash, 
 from flask_restful import Api, Resource
 from flask_httpauth import HTTPBasicAuth
@@ -51,8 +52,9 @@ class TotalAPI(Resource):
         config.TOTAL  = True
 
     def get(self, id):
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         info = mtec.getContractsInfo(id)
-        myprint(1, json.dumps(info, ensure_ascii=False))        
+        myprint(1, dt_now, json.dumps(info, ensure_ascii=False))
         outputDict = {
             "date"   : info['totalConsumptionDate'],
             "value"  : info['totalConsumptionVol'],
@@ -78,8 +80,9 @@ class MiscInfoAPI(Resource):
         config.MISCINFO = True
 
     def get(self, id):
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         info = mtec.getContractsInfo(id)
-        myprint(1, json.dumps(info, ensure_ascii=False))        
+        myprint(1, dt_now, json.dumps(info, ensure_ascii=False))   
         outputDict = {
             "Offre"			: info['Offre'],
             "PuissanceSouscrite"	: info['PuissanceSouscrite'],

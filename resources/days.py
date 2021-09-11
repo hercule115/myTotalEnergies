@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import jsonify, make_response # redirect, request, url_for, current_app, flash, 
 from flask_restful import Api, Resource
 from flask_httpauth import HTTPBasicAuth
@@ -10,7 +11,6 @@ import myTotalEnergiesContracts as mtec
 import myGlobals as mg
 from common.utils import myprint, masked, computeConsumptionByDays, generateConsumptionChart
 
-from datetime import datetime
 import random
 
 auth = HTTPBasicAuth()
@@ -52,8 +52,9 @@ class DaysAPI(Resource):
         config.TOTAL  = False
         
     def get(self, id):
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         info = mtec.getContractsInfo(id)
-        myprint(1, json.dumps(info, ensure_ascii=False))
+        myprint(1, dt_now, json.dumps(info, ensure_ascii=False))
         return (info)
 
     def put(self, id):
@@ -98,11 +99,8 @@ class DaysChartAPI(Resource):
         config.TOTAL  = False
 
     def get(self, id):
-        # info = computeConsumptionByDays()
-        # firstDate = info['date'][0]
-        # lastDate  = info['date'][-1]
-        # #print(len(days['date']),firstDate,lastDate)
-        # outFilePath = generateConsumptionChart(info, interval='Day', opt='(%s / %s)' % (firstDate, lastDate))
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        myprint(1, dt_now, 'Generating plot chart (by day)')
 
         bydays = computeConsumptionByDays()
         if not bydays:
