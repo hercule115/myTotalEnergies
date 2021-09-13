@@ -368,34 +368,6 @@ class TotalEnergies:
                         hack = records[0]	# Save our hack record to be used in the next loop
                         continue
 
-                    # rowAsList = row[0].split(';')
-
-                    # resource     = rowAsList[0]
-                    # fullDate0AsString = rowAsList[1] #.replace('"','')
-                    # fullDate1AsString = rowAsList[2] #.replace('"','')
-                    # if fullDate0AsString != fullDate1AsString:
-                    #     #dts0 = datetime.strptime(fullDate0AsString, '%m/%Y').strftime('%Y-%m-%d')
-                    #     dts0 = datetime.strptime(fullDate0AsString, '%m/%Y')
-                    #     dts1 = datetime.strptime(fullDate1AsString, '%m/%Y')
-                    #     if diff_month(dts1, dts0) > 1:
-                    #         myprint(1, 'Skipping malformed input: %s' % (row))
-                    #         continue
-                    # dateAsString = fullDate0AsString[:7]
-                    # consAsString = rowAsList[3].replace('"','')
-                    # cons = int(consAsString.split(' ')[0])
-                    # unit = consAsString.split(' ')[1]
-
-                    # try:
-                    #     dts = datetime.strptime(dateAsString, '%m/%Y').strftime('%Y-%m-%d')
-                    #     # Build a long date to be used as name (ex: April 2030)
-                    #     longDate = datetime.strptime(dateAsString, '%m/%Y').strftime('%B %Y')
-                    # except:
-                    #     myprint(1, 'ERROR while parsing date: %s' % dateAsString)
-
-                    # if dts in months:
-                    #     myprint(1, 'Skipping duplicate line for date %s' % (dts))
-                    #     continue
-
                     # Update list of records
                     for item in records:
                         dateAsString = item[0]
