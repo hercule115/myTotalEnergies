@@ -89,17 +89,22 @@ class Last6MonthsAPI(Resource):
         outputDict["Contract"] = id
         outputDict["MonthReports"] = list()
         for item in last6Months:
-            #print(item) # item is a list of tuples
-            date,(cons, unit, friendlyDate) = item
-            #print(date,cons,unit,friendlyDate)
-            outputDict["MonthReports"].append(
-                {
+            myprint(1, item) # item is a list of tuples
+            try:
+                date,(cons, unit, friendlyDate) = item
+            except:
+                myprint(0, 'Unable to parse item for fields: date,(cons, unit, friendlyDate)', item)
+                #print(date,cons,unit,friendlyDate)
+                return {}
+            else:
+                outputDict["MonthReports"].append(
+                    {
                     "date":  date,
-                    "value": cons,
-                    "unit":  unit,
-                    "friendlyDate":friendlyDate,
-                }
-            )
+                        "value": cons,
+                        "unit":  unit,
+                        "friendlyDate":friendlyDate,
+                    }
+                )
 
         myprint(1, json.dumps(outputDict, ensure_ascii=False))
         #r = unicode(str, errors='replace')

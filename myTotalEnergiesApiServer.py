@@ -12,7 +12,7 @@ import sys
 import time
 
 import config
-from common.utils import myprint, isFileOlderThanXMinutes
+from common.utils import myprint, isFileOlderThanXMinutes, sleepUntil
 
 import myTotalEnergiesContracts as mtec
 import myTotalEnergiesCosts as mtecosts
@@ -44,7 +44,7 @@ apiResources = {
         ]
 }
 
-def foreverLoop(loop_on, dataCachePath, debug, updateDelay):
+def foreverLoop(loop_on, dataCachePath, debug, updateDelay, updateTime):
     config.DEBUG = debug
 
     class color:
@@ -64,7 +64,8 @@ def foreverLoop(loop_on, dataCachePath, debug, updateDelay):
     
     while True:
         if loop_on.value == True:
-            time.sleep(updateDelay)
+            #time.sleep(updateDelay)
+            sleepUntil(updateTime)
             myprint(0, 'Reloading TE cache file from server...')
             res = mtec.getContractsInfoFromTotalEnergiesServer(dataCachePath)
             if res:
@@ -135,7 +136,8 @@ def apiServerMain():
     p = Process(target=foreverLoop, args=(recording_on,
                                           mg.dataCachePath,
                                           config.DEBUG,
-                                          config.UPDATEDELAY))
+                                          config.UPDATEDELAY,
+                                          config.UPDATETIME))
     p.start()  
     app.run(debug=True, use_reloader=False, port=5001) ##, host="0.0.0.0", port=6420)
     p.join()
