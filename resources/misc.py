@@ -120,6 +120,7 @@ class MiscInfoAPI(Resource):
                 "NumeroCompteurELEC"	: info['NumeroCompteurELEC'],
                 "IDClient"		: info['IDClient'],
                 "PDL"			: info['PDL'],
+                "DataCacheFileModDate"	: info['DataCacheFileModDate'],
             }
         except:
             myprint(0, dt_now, 'Unable to parse info for: Offre, PuissanceSouscrite, OptionTarifaire,...', info)

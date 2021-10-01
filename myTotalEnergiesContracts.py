@@ -30,7 +30,7 @@ def getDataFromCache():
         rawInfo = loadDataFromCacheFile(mg.dataCachePath)
         mg.prevModTime = currModTime
         # Rebuild allContracts dictionary
-        mg.allContracts = buildAllContracts(rawInfo)
+        mg.allContracts = buildAllContracts(rawInfo, dt)
     else:
         myprint(1, 'Data cache is up to date')
 
@@ -40,9 +40,10 @@ def getDataFromCache():
 
 ####
 # Build allContracts dictionnary with relevant information from data cache file    
-def buildAllContracts(rawInfo):
+def buildAllContracts(rawInfo, dt):
     myprint(1, 'Building AllContracts dictionary from raw data (#contracts=%d)' % (len(rawInfo)))
-
+    myprint(1, 'Data cache file modification date: %s' % (dt))
+    
     # Output dict
     allContracts = dict()
 
@@ -63,6 +64,7 @@ def buildAllContracts(rawInfo):
     miscInfo['PuissanceSouscrite']       = dl['PuissanceSouscrite']
     miscInfo['ElecProchaineReleveDate']  = dl['ElecProchaineReleveDate']
     miscInfo['ElecProchaineFactureDate'] = dl['ElecProchaineFactureDate']
+    miscInfo['DataCacheFileModDate']     = dt
     allContracts[contract]['miscInfo'] = miscInfo
 
     # Build 'powerCons'

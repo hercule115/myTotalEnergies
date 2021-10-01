@@ -602,10 +602,9 @@ class TotalEnergies:
 
         if r.status_code != rqst["resp"]["code"]:
             myprint(1,'Invalid Status Code: %d (expected %d). Reason: %s' % (r.status_code, rqst["resp"]["code"], r.reason))
-            if rqst["returnText"]:
-                return ''
-            else:
-                return
+            errorMsg = 'ErRoR while retrieving information: Invalid Status Code: %d (expected %d)' % (r.status_code, rqst["resp"]["code"], r.reason)
+            myprint(0, errorMsg)
+            return errorMsg
 
         myprint(2,'Response Headers:', json.dumps(dict(r.headers), indent=2))
         
