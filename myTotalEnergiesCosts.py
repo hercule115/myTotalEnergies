@@ -215,6 +215,12 @@ def parseTariffsPage(html):
     table = soup.find('table', attrs={'class':'table'})
     table_body = table.find('tbody')
 
+    myprint(2, 'table_body:', table_body)
+
+    #<caption class="table__title">Tarifs du contrat Online Electricité de TotalEnergies</caption>
+    #table_body_caption = table_body.find('caption')
+    #myprint(2, 'table_body caption:', table_body_caption)
+    
     rows = table_body.find_all('tr')
     for row in rows:
         power = row.find('th').text.strip().split()[0]
