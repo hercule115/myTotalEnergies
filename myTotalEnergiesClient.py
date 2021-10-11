@@ -257,6 +257,10 @@ class TotalEnergies:
         self._executeRequest('ma-conso-elec') # Required ???
 
         respText = self._executeRequest('mon-historique-conso-electricite')
+        if 'ErRoR' in respText:
+            myprint(1, "Error when executing 'mon-historique-conso-electricite' request")
+            return respText
+
         # Parse output text to get all URLS to download history files
         info = self._parseMonHistoriqueConsoElecPage(respText)
 
@@ -528,6 +532,7 @@ class TotalEnergies:
             # Add this URL to monHistoUrls
             monHistoUrls[controller][type] = url
 
+        myprint(2, json.dumps(monHistoUrls, indent=4))            
         return monHistoUrls
 
     
@@ -602,7 +607,7 @@ class TotalEnergies:
 
         if r.status_code != rqst["resp"]["code"]:
             myprint(1,'Invalid Status Code: %d (expected %d). Reason: %s' % (r.status_code, rqst["resp"]["code"], r.reason))
-            errorMsg = 'ErRoR while retrieving information: Invalid Status Code: %d (expected %d)' % (r.status_code, rqst["resp"]["code"], r.reason)
+            errorMsg = 'ErRoR while retrieving information: Invalid Status Code: %d (expected %d)' % (r.status_code, rqst["resp"]["code"])
             myprint(0, errorMsg)
             return errorMsg
 

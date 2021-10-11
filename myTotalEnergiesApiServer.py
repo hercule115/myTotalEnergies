@@ -107,30 +107,34 @@ def apiServerMain():
             os.remove(mg.dataCachePath)
             res = mtec.getContractsInfoFromTotalEnergiesServer(mg.dataCachePath)
             if res:
-                myprint(0, 'Failed to create local data cache. Aborting server')
-                return(res)
+                #myprint(0, 'Failed to create local data cache. Aborting server')
+                myprint(0, 'Failed to create local data cache.')
+                #return(res)
     else:
         res = mtec.getContractsInfoFromTotalEnergiesServer(mg.dataCachePath)        
         if res:
-            myprint(0, 'Failed to create local data cache. Aborting server')
-            return(res)
+            #myprint(0, 'Failed to create local data cache. Aborting server')
+            myprint(0, 'Failed to create local data cache.')
+            #return(res)
         
     if os.path.isfile(mg.costsDataCachePath):
         if isFileOlderThanXMinutes(mg.costsDataCachePath, minutes=COSTS_DATACACHE_AGING_IN_MINUTES):
-            t = os.path.getmtime(mg.dataCachePath)
+            t = os.path.getmtime(mg.costsDataCachePath)
             dt = datetime.fromtimestamp(t).strftime('%Y/%m/%d %H:%M:%S')
             myprint(0, f'Costs Cache file outdated ({dt}). Deleting and reloading from Prix-Elec server')
             # Remove data cache file and reload from server
             os.remove(mg.costsDataCachePath)
             res = mtecosts.getTariffsInfoFromPrixElecServer(mg.costsDataCachePath)
             if res:
-                myprint(0, 'Failed to create costs local data cache. Aborting server')
-                return res
+                #myprint(0, 'Failed to create costs local data cache. Aborting server')
+                myprint(0, 'Failed to create costs local data cache.')
+                #return res
     else:
         res = mtecosts.getTariffsInfoFromPrixElecServer(mg.costsDataCachePath)
         if res:
-            myprint(0, 'Failed to create costs local data cache. Aborting server')
-            return res
+            #myprint(0, 'Failed to create costs local data cache. Aborting server')
+            myprint(0, 'Failed to create costs local data cache.')
+            #return res
 
     recording_on = Value('b', True)
     p = Process(target=foreverLoop, args=(recording_on,
