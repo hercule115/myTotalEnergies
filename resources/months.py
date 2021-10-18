@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import jsonify, make_response, url_for  # redirect, request, url_for, current_app, flash, 
 from flask_restful import Api, Resource
 from flask_httpauth import HTTPBasicAuth
@@ -50,8 +51,8 @@ class MonthsChartAPI(Resource):
         config.TOTAL  = False
 
     def get(self, id):
-        #info = computeConsumptionByMonths()
-        #outFilePath = generateConsumptionChart(info, interval='Month')
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        myprint(1, dt_now, 'Generating plot chart (by month)')
 
         bymonths = computeConsumptionByMonths()
         if not bymonths:
@@ -88,17 +89,22 @@ class Last6MonthsAPI(Resource):
         outputDict["Contract"] = id
         outputDict["MonthReports"] = list()
         for item in last6Months:
-            #print(item) # item is a list of tuples
-            date,(cons, unit, friendlyDate) = item
-            #print(date,cons,unit,friendlyDate)
-            outputDict["MonthReports"].append(
-                {
+            myprint(1, item) # item is a list of tuples
+            try:
+                date,(cons, unit, friendlyDate) = item
+            except:
+                myprint(0, 'Unable to parse item for fields: date,(cons, unit, friendlyDate)', item)
+                #print(date,cons,unit,friendlyDate)
+                return {}
+            else:
+                outputDict["MonthReports"].append(
+                    {
                     "date":  date,
-                    "value": cons,
-                    "unit":  unit,
-                    "friendlyDate":friendlyDate,
-                }
-            )
+                        "value": cons,
+                        "unit":  unit,
+                        "friendlyDate":friendlyDate,
+                    }
+                )
 
         myprint(1, json.dumps(outputDict, ensure_ascii=False))
         #r = unicode(str, errors='replace')
@@ -120,8 +126,9 @@ class MonthsAPI(Resource):
         config.TOTAL  = False
 
     def get(self, id):
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         info = mtec.getContractsInfo(id)
-        myprint(1, json.dumps(info, ensure_ascii=False))
+        myprint(1, dt_now, json.dumps(info, ensure_ascii=False))
         return info
 
     def put(self, id):

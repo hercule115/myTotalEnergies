@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import jsonify, make_response, url_for  # redirect, request, url_for, current_app, flash, 
 from flask_restful import Api, Resource
 from flask_httpauth import HTTPBasicAuth
@@ -45,20 +46,88 @@ class TotalAPI(Resource):
 
     def __init__(self):
         # Set config.DAYS and config.MONTHS as False to get total consumption information
-        config.DAYS   = False
-        config.MONTHS = False
-        config.TOTAL  = True        
+        config.DAYS     = False
+        config.MONTHS   = False
+        config.MISCINFO = False
+        config.TOTAL    = True
 
     def get(self, id):
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         info = mtec.getContractsInfo(id)
-        myprint(1, json.dumps(info, ensure_ascii=False))        
-        outputDict = {
-            "date"   : info['totalConsumptionDate'],
-            "value"  : info['totalConsumptionVol'],
-            "unit"   : info['totalConsumptionUnit'],
-        }
-        return outputDict
 
+        myprint(1,
+                'config.SERVER =',    config.SERVER,
+                'config.VERBOSE =',   config.VERBOSE,
+                'config.USE_CACHE =', config.USE_CACHE,
+                'config.DAYS =',      config.DAYS,
+                'config.MONTHS =',    config.MONTHS,
+                'config.TOTAL =',     config.TOTAL,
+                'config.MISCINFO =',  config.MISCINFO,
+                'config.COSTS =',     config.COSTS,
+        )
+
+        myprint(1, dt_now, json.dumps(info, ensure_ascii=False))
+        try:
+            outputDict = {
+                "date"   : info['totalConsumptionDate'],
+                "value"  : info['totalConsumptionVol'],
+                "unit"   : info['totalConsumptionUnit'],
+            }
+        except:
+            myprint(0, dt_now, 'Unable to parse info for fields : date,value,unit', info)
+            return {}
+        else:
+            return outputDict
+
+    def put(self, id):
+        pass
+
+    def delete(self, id):
+        pass
+
+
+class MiscInfoAPI(Resource):
+    decorators = [auth.login_required]
+
+    def __init__(self):
+        # Set config.* to False but config.DATALAYER to get misc. info
+        config.DAYS   = False
+        config.MONTHS = False
+        config.TOTAL  = False
+        config.MISCINFO = True
+
+    def get(self, id):
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        info = mtec.getContractsInfo(id)
+
+        myprint(1,
+                'config.SERVER =',    config.SERVER,
+                'config.VERBOSE =',   config.VERBOSE,
+                'config.USE_CACHE =', config.USE_CACHE,
+                'config.DAYS =',      config.DAYS,
+                'config.MONTHS =',    config.MONTHS,
+                'config.TOTAL =',     config.TOTAL,
+                'config.MISCINFO =',  config.MISCINFO,
+                'config.COSTS =',     config.COSTS,
+        )
+
+        myprint(1, dt_now, json.dumps(info, ensure_ascii=False))   
+        try:
+            outputDict = {
+                "Offre"			: info['Offre'],
+                "PuissanceSouscrite"	: info['PuissanceSouscrite'],
+                "OptionTarifaire"	: info['OptionTarifaire'],
+                "NumeroCompteurELEC"	: info['NumeroCompteurELEC'],
+                "IDClient"		: info['IDClient'],
+                "PDL"			: info['PDL'],
+                "DataCacheFileModDate"	: info['DataCacheFileModDate'],
+            }
+        except:
+            myprint(0, dt_now, 'Unable to parse info for: Offre, PuissanceSouscrite, OptionTarifaire,...', info)
+            return {}
+        else:
+            return outputDict
+            
     def put(self, id):
         pass
 

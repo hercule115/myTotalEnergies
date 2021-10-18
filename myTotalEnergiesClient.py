@@ -257,6 +257,10 @@ class TotalEnergies:
         self._executeRequest('ma-conso-elec') # Required ???
 
         respText = self._executeRequest('mon-historique-conso-electricite')
+        if 'ErRoR' in respText:
+            myprint(1, "Error when executing 'mon-historique-conso-electricite' request")
+            return respText
+
         # Parse output text to get all URLS to download history files
         info = self._parseMonHistoriqueConsoElecPage(respText)
 
@@ -367,34 +371,6 @@ class TotalEnergies:
                     if isError == True:
                         hack = records[0]	# Save our hack record to be used in the next loop
                         continue
-
-                    # rowAsList = row[0].split(';')
-
-                    # resource     = rowAsList[0]
-                    # fullDate0AsString = rowAsList[1] #.replace('"','')
-                    # fullDate1AsString = rowAsList[2] #.replace('"','')
-                    # if fullDate0AsString != fullDate1AsString:
-                    #     #dts0 = datetime.strptime(fullDate0AsString, '%m/%Y').strftime('%Y-%m-%d')
-                    #     dts0 = datetime.strptime(fullDate0AsString, '%m/%Y')
-                    #     dts1 = datetime.strptime(fullDate1AsString, '%m/%Y')
-                    #     if diff_month(dts1, dts0) > 1:
-                    #         myprint(1, 'Skipping malformed input: %s' % (row))
-                    #         continue
-                    # dateAsString = fullDate0AsString[:7]
-                    # consAsString = rowAsList[3].replace('"','')
-                    # cons = int(consAsString.split(' ')[0])
-                    # unit = consAsString.split(' ')[1]
-
-                    # try:
-                    #     dts = datetime.strptime(dateAsString, '%m/%Y').strftime('%Y-%m-%d')
-                    #     # Build a long date to be used as name (ex: April 2030)
-                    #     longDate = datetime.strptime(dateAsString, '%m/%Y').strftime('%B %Y')
-                    # except:
-                    #     myprint(1, 'ERROR while parsing date: %s' % dateAsString)
-
-                    # if dts in months:
-                    #     myprint(1, 'Skipping duplicate line for date %s' % (dts))
-                    #     continue
 
                     # Update list of records
                     for item in records:
@@ -556,6 +532,7 @@ class TotalEnergies:
             # Add this URL to monHistoUrls
             monHistoUrls[controller][type] = url
 
+        myprint(2, json.dumps(monHistoUrls, indent=4))            
         return monHistoUrls
 
     
@@ -630,10 +607,9 @@ class TotalEnergies:
 
         if r.status_code != rqst["resp"]["code"]:
             myprint(1,'Invalid Status Code: %d (expected %d). Reason: %s' % (r.status_code, rqst["resp"]["code"], r.reason))
-            if rqst["returnText"]:
-                return ''
-            else:
-                return
+            errorMsg = 'ErRoR while retrieving information: Invalid Status Code: %d (expected %d)' % (r.status_code, rqst["resp"]["code"])
+            myprint(0, errorMsg)
+            return errorMsg
 
         myprint(2,'Response Headers:', json.dumps(dict(r.headers), indent=2))
         

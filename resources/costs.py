@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import jsonify, make_response
 from flask_restful import Api, Resource
 import json
@@ -5,7 +6,6 @@ import os
 import re
 #import unicodedata
 
-#import authinfo
 import myTotalEnergiesCosts as mtecosts
 import myGlobals as mg
 from common.utils import myprint
@@ -17,7 +17,9 @@ class BaseCostsAPI(Resource):
         pass
     
     def get(self, power):
+        dt_now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         costs = mtecosts.getCostsFromCacheFile(power)
+        myprint(1, dt_now, json.dumps(costs, ensure_ascii=False))
         # Example:
         # yearly fee Base,  base,       yearly fee HC,  Cost HP,    Cost HC 
         # ['137.64€',       '0.1442€',  '145.83€',      '0.1678€',  '0.1263€']
@@ -28,14 +30,23 @@ class BaseCostsAPI(Resource):
                 "value"	: 0,
                 "unit"	: ''
             }
+            return outputDict
         else:
-            v = float(re.findall("\d+\.\d+",costs[1])[0])	# Numeric/floating value
-            outputDict = {
-                "value"	:	v,
-                "unit"	:	costs[1][-1]	# HACK: Last char is unit
-            }
-        return outputDict
-
+            try:
+                v = float(re.findall("\d+\.\d+",costs[1])[0])	# Numeric/floating value
+                outputDict = {
+                    "value" :	v,
+                    "unit"  :	costs[1][-1]	# HACK: Last char is unit
+                }
+            except:
+                myprint(0, dt_now, 'Unable to parse costs info')
+                outputDict = {
+                    "value" : 0,
+                    "unit"  : ''
+                }
+            else:
+                return outputDict
+            
     def put(self, id):
         pass
 

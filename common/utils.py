@@ -290,7 +290,7 @@ def parseConsumptionByMonths():
     inputFile = mg.consumptionFilesDict['MOIS']
     if not os.path.isfile(inputFile):
         myprint(0, f'{inputFile} consumption file does not exist')
-        return {}
+        return ({}, 0)
 
     myprint(1, f'Parsing file: {inputFile}')
     
@@ -337,7 +337,7 @@ def parseConsumptionByMonths():
                 hack = None
     except:
         myprint(0, 'ERROR while parsing input file')
-        return None
+        return ({}, 0)
 
     totalConsumption = sum(fullmonths['cons'])
     return (fullmonths, totalConsumption)
@@ -354,6 +354,9 @@ def computeTotalConsumption():
 def computeConsumptionByMonths():
     consumptionByMonths, totalConsumption = parseConsumptionByMonths()
 
+    if not consumptionByMonths:
+        return {}
+    
     # Keep last 12 elements of the list
     outputDict = dict()
     for x in ['date', 'month', 'year', 'longDate', 'cons', 'unit']:
@@ -380,7 +383,6 @@ def generateConsumptionChart(d, interval, opt=''):
     # Clear out odd xticks to increase readibility
     xticks = d['date']
     xticks[1::2] = [''] * math.floor(len(d['date'])/2)
-    #print(xticks)
     plt.xticks(range(0,len(xticks)), xticks)
 
     #plt.title('Consumption by %s %s' % (interval,opt))

@@ -12,37 +12,39 @@ import sys
 import time
 
 import config
-from common.utils import myprint, isFileOlderThanXMinutes
+from common.utils import myprint, isFileOlderThanXMinutes, sleepUntil
 
 import myTotalEnergiesContracts as mtec
 import myTotalEnergiesCosts as mtecosts
 
 from resources.days import DaysAPI, LastDayAPI
-from resources.months import MonthsAPI, LastMonthAPI
+from resources.months import MonthsAPI, LastMonthAPI, Last6MonthsAPI
 from resources.costs import BaseCostsAPI
-from resources.misc import TotalAPI
+from resources.misc import TotalAPI, MiscInfoAPI
 
 DATACACHE_AGING_IN_MINUTES = 60
 COSTS_DATACACHE_AGING_IN_MINUTES = 1440 # 1 full day
 
 apiResources = {
     "days" : [
-        (DaysAPI,     '/myte/api/v1.0/days/<string:id>',    'days'),
-        (LastDayAPI,  '/myte/api/v1.0/lastday/<string:id>', 'lastday')
+        (DaysAPI,	'/myte/api/v1.0/days/<string:id>',    'days'),
+        (LastDayAPI,	'/myte/api/v1.0/lastday/<string:id>', 'lastday'),
         ],
     "months" : [
-        (MonthsAPI,     '/myte/api/v1.0/months/<string:id>',    'months'),
-        (LastMonthAPI,  '/myte/api/v1.0/lastmonth/<string:id>', 'lastmonth')
+        (MonthsAPI,	'/myte/api/v1.0/months/<string:id>',    'months'),
+        (LastMonthAPI,	'/myte/api/v1.0/lastmonth/<string:id>', 'lastmonth'),
+        (Last6MonthsAPI,'/myte/api/v1.0/last6months/<string:id>', 'last6months'),
         ],
     "costs" : [
-        (BaseCostsAPI, '/myte/api/v1.0/costs/base/<string:power>', 'basecosts'),
+        (BaseCostsAPI,	'/myte/api/v1.0/costs/base/<string:power>', 'basecosts'),
         ],
     "misc" : [
-        (TotalAPI,     '/myte/api/v1.0/total/<string:id>',    'total'),
+        (TotalAPI,	'/myte/api/v1.0/total/<string:id>',    'total'),
+        (MiscInfoAPI,	'/myte/api/v1.0/miscinfo/<string:id>',    'miscinfo'),
         ]
 }
 
-def foreverLoop(loop_on, dataCachePath, debug, updateDelay):
+def foreverLoop(loop_on, dataCachePath, debug, updateDelay, updateTime):
     config.DEBUG = debug
 
     class color:
@@ -62,7 +64,8 @@ def foreverLoop(loop_on, dataCachePath, debug, updateDelay):
     
     while True:
         if loop_on.value == True:
-            time.sleep(updateDelay)
+            #time.sleep(updateDelay)
+            sleepUntil(updateTime)
             myprint(0, 'Reloading TE cache file from server...')
             res = mtec.getContractsInfoFromTotalEnergiesServer(dataCachePath)
             if res:
@@ -104,36 +107,41 @@ def apiServerMain():
             os.remove(mg.dataCachePath)
             res = mtec.getContractsInfoFromTotalEnergiesServer(mg.dataCachePath)
             if res:
-                myprint(0, 'Failed to create local data cache. Aborting server')
-                return(res)
+                #myprint(0, 'Failed to create local data cache. Aborting server')
+                myprint(0, 'Failed to create local data cache.')
+                #return(res)
     else:
         res = mtec.getContractsInfoFromTotalEnergiesServer(mg.dataCachePath)        
         if res:
-            myprint(0, 'Failed to create local data cache. Aborting server')
-            return(res)
+            #myprint(0, 'Failed to create local data cache. Aborting server')
+            myprint(0, 'Failed to create local data cache.')
+            #return(res)
         
     if os.path.isfile(mg.costsDataCachePath):
         if isFileOlderThanXMinutes(mg.costsDataCachePath, minutes=COSTS_DATACACHE_AGING_IN_MINUTES):
-            t = os.path.getmtime(mg.dataCachePath)
+            t = os.path.getmtime(mg.costsDataCachePath)
             dt = datetime.fromtimestamp(t).strftime('%Y/%m/%d %H:%M:%S')
             myprint(0, f'Costs Cache file outdated ({dt}). Deleting and reloading from Prix-Elec server')
             # Remove data cache file and reload from server
             os.remove(mg.costsDataCachePath)
             res = mtecosts.getTariffsInfoFromPrixElecServer(mg.costsDataCachePath)
             if res:
-                myprint(0, 'Failed to create costs local data cache. Aborting server')
-                return res
+                #myprint(0, 'Failed to create costs local data cache. Aborting server')
+                myprint(0, 'Failed to create costs local data cache.')
+                #return res
     else:
         res = mtecosts.getTariffsInfoFromPrixElecServer(mg.costsDataCachePath)
         if res:
-            myprint(0, 'Failed to create costs local data cache. Aborting server')
-            return res
+            #myprint(0, 'Failed to create costs local data cache. Aborting server')
+            myprint(0, 'Failed to create costs local data cache.')
+            #return res
 
     recording_on = Value('b', True)
     p = Process(target=foreverLoop, args=(recording_on,
                                           mg.dataCachePath,
                                           config.DEBUG,
-                                          config.UPDATEDELAY))
+                                          config.UPDATEDELAY,
+                                          config.UPDATETIME))
     p.start()  
     app.run(debug=True, use_reloader=False, port=5001) ##, host="0.0.0.0", port=6420)
     p.join()
