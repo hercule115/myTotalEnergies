@@ -225,27 +225,6 @@ def parseTariffsPage(html):
     return outputDict
 
 
-# def getCostsFromFile(power):
-#     costs = list()
-
-#     #mg.costsFilePath = os.path.join(mg.moduleDirPath, PRIX_KWH_2021_FILE)
-#     myprint(1, f'Using {mg.costsDataCachePath} (power={power})')
-    
-#     try:
-#         with open(mg.costsDataCachePath, 'r') as infile:
-#             data  = infile.read()
-#             try:
-#                 costs = parseTariffsPage(data)[power]
-#                 myprint(1, costs)
-#             except:
-#                 myprint(0, f'Unable to cope with costs')
-
-#     except Exception as error: 
-#         myprint(0, f'Unable to cope with costs cache file {mg.costFilePath}')
-
-#     return costs
-
-
 ####
 # Retrieve the costs for "power" from json cache file
 def getCostsFromCacheFile(power):
