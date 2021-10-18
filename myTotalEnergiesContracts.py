@@ -200,6 +200,8 @@ def getContractsInfoFromTotalEnergiesServer(dataCachePath):
         print('%-15s: %s' % ('TE Username', config.TE_USERNAME))
         print('%-15s: %s' % ('TE Password', masked(config.TE_PASSWORD, 3)))
 
+    myprint(0, 'Retrieving data from TotalEnergies Server. Can take some time...')
+    
     with requests.session() as session:
         # Create connection to Sosh server, connect with given credentials
         te = myTotalEnergiesClient.TotalEnergies(config.TE_USERNAME, config.TE_PASSWORD, session)
