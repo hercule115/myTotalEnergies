@@ -95,6 +95,9 @@ def parse_argv():
     parser.add_argument("--costs",
                         action="store_true", dest="costs", default=False,
                         help="download/shows information about kWH costs")
+    parser.add_argument("-m", "--misc",
+                        action="store_true", dest="miscinfo", default=False,
+                        help="provide miscellaneous information")
 
     # Credentials arguments    
     parser.add_argument('-u', '--user',
@@ -158,6 +161,7 @@ def main():
     config.MONTHS    = args.months
     config.TOTAL     = args.total
     config.COSTS     = args.costs
+    config.MISCINFO  = args.miscinfo
     
     if config.DEBUG:
         myprint(1, 'Running in DEBUG mode (level=%d)' % config.DEBUG)
@@ -169,6 +173,7 @@ def main():
                 'config.MONTHS =',    config.MONTHS,
                 'config.TOTAL =',     config.TOTAL,
                 'config.COSTS =',     config.COSTS,
+                'config.MISCINFO',    config.MISCINFO,
         )
         
     if args.logFile == None:
@@ -240,17 +245,8 @@ def main():
     if config.USE_CACHE:
         # Load data from local cache
         info = mtec.getContractsInfo(contract)
-        #print(json.dumps(info, indent=4, ensure_ascii=False))
-        
-        #if config.VERBOSE:
-            # for k,v in info.items():
-            #     oneContract = v
-            #     print('%s%s%s' % (color.BOLD, k, color.END))
-            #     print(json.dumps(oneContract, indent=4, ensure_ascii=False))
-
         dumpContractInformation(contract, info)
         sys.exit(0)
-
 
     # Read data from TotalEnergies webserver
     res = mtec.getContractsInfoFromTotalEnergiesServer(mg.dataCachePath)

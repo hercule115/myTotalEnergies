@@ -94,73 +94,85 @@ def loadDataFromCacheFile(dataCachePath):
 
     
 ####
+def getSingleContractInfo(oneContract):
+
+    outputDict = dict()
+    
+    if config.MONTHS:
+        # Show information about months only
+        try:
+            outputDict = oneContract['consByMonths']
+        except:
+            myprint(1, 'No "consByMonths" entry found')
+            outputDict = {}
+        #print(json.dumps(outputDict, ensure_ascii=False))
+        return outputDict
+
+    if config.DAYS:
+        # Show information about days only
+        try:
+            outputDict = oneContract['consByDays']
+        except:
+            myprint(1, 'No "consByDays" entry found')
+            outputDict = {}
+        #print(json.dumps(outputDict, ensure_ascii=False))
+        return outputDict
+
+    if config.TOTAL:
+        # Show total consumption information
+        try:
+            outputDict = oneContract['powerCons']
+        except:
+            myprint(1, 'No "powerCons" entry found')
+            outputDict = {}
+        #print(json.dumps(outputDict, ensure_ascii=False))
+        return outputDict
+
+    if config.MISCINFO:
+        # Show general contract information
+        try:
+            outputDict = oneContract['miscInfo']
+        except:
+            myprint(1, 'No "miscInfo" entry found')
+            outputDict = {}
+        #print(json.dumps(outputDict, ensure_ascii=False))
+        return outputDict
+            
+    return oneContract	# No option set
+
+        
 def getContractsInfo(contract):
 
     myprint(1, f'Looking for contract: %s{contract}%s' % (color.BOLD, color.END))
 
     allContracts = getDataFromCache()
+    #myprint(0,json.dumps(allContracts, ensure_ascii=False))
 
+    outputDict = dict()
+    
     if contract == 'all':
-        myprint(1, 'Returning all info for all contracts')
-        return allContracts
-    else:
-        # Single contract requested
-        outputDict = dict()
-        myprint(1, f'Generating outputDict for contract: {contract}')
+        myprint(1, 'Returning info for all contracts')
 
-        if not contract in allContracts:
-            return outputDict # empty dict
+        for contractnum, oneContract in allContracts.items():
+            myprint(1, f'Retrieving info for contract {contractnum}')
+            outputDict[contractnum] = getSingleContractInfo(oneContract)
+            continue
+        return outputDict
+    
+    # Single contract requested
+    
+    myprint(1, f'Generating outputDict for contract: {contract}')
+
+    if not contract in allContracts:
+        return {} # empty dict
         
-        oneContract = allContracts[contract]
-        #print(oneContract)
+    oneContract = allContracts[contract]
         
-        if config.VERBOSE:
-            # Return all info for this contract
-            return oneContract
+    if config.VERBOSE:
+        # Return all info for this contract
+        return oneContract
 
-        if config.MONTHS:
-            # Show information about months only
-            try:
-                outputDict = oneContract['consByMonths']
-            except:
-                myprint(1, 'No "consByMonths" entry found')
-                outputDict = {}
-            #print(json.dumps(outputDict, ensure_ascii=False))
-            return outputDict
-
-        if config.DAYS:
-            # Show information about days only
-            try:
-                outputDict = oneContract['consByDays']
-            except:
-                myprint(1, 'No "consByDays" entry found')
-                outputDict = {}
-            #print(json.dumps(outputDict, ensure_ascii=False))
-            return outputDict
-
-        if config.TOTAL:
-            # Show total consumption information
-            try:
-                outputDict = oneContract['powerCons']
-            except:
-                myprint(1, 'No "powerCons" entry found')
-                outputDict = {}
-            #print(json.dumps(outputDict, ensure_ascii=False))
-            return outputDict
-
-        #print(oneContract['dataLayer'])
-        
-        if config.MISCINFO:
-            # Show general contract information
-            try:
-                outputDict = oneContract['miscInfo']
-            except:
-                myprint(1, 'No "miscInfo" entry found')
-                outputDict = {}
-            #print(json.dumps(outputDict, ensure_ascii=False))
-            return outputDict
-        
-        return {}	# return empty dict if no option is set
+    return getSingleContractInfo(oneContract)
 
 
 def saveLastLineOfConsFiles():
@@ -200,7 +212,7 @@ def getContractsInfoFromTotalEnergiesServer(dataCachePath):
         print('%-15s: %s' % ('TE Username', config.TE_USERNAME))
         print('%-15s: %s' % ('TE Password', masked(config.TE_PASSWORD, 3)))
 
-    myprint(0, 'Retrieving data from TotalEnergies Server. Can take some time...')
+    myprint(1, 'Retrieving data from TotalEnergies Server. Can take some time...')
     
     with requests.session() as session:
         # Create connection to Sosh server, connect with given credentials
@@ -216,8 +228,7 @@ def getContractsInfoFromTotalEnergiesServer(dataCachePath):
         myprint(1, 'Error retrieving information from TotalEnergies server')
         return -1
    
-    #myprint(1, type(info), len(info))
-    print(json.dumps(info, indent=4))
+    #print(json.dumps(info, indent=4))
     
     # (Re-)build days chart (last 14 days only)
     bydays = computeConsumptionByDays()

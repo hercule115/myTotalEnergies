@@ -599,7 +599,7 @@ class TotalEnergies:
                 errFlag = True
 
         if errFlag:
-            errorMsg = 'ErRoR while retrieving information: %s' % (e) # Dont't change the cast for ErRoR  !!!!
+            errorMsg = 'ErRoR while retrieving information. Request: %s: %s' % (name,e) # Dont't change the cast for ErRoR  !!!!
             myprint(0, errorMsg)
             return errorMsg
 
@@ -607,7 +607,7 @@ class TotalEnergies:
 
         if r.status_code != rqst["resp"]["code"]:
             myprint(1,'Invalid Status Code: %d (expected %d). Reason: %s' % (r.status_code, rqst["resp"]["code"], r.reason))
-            errorMsg = 'ErRoR while retrieving information: Invalid Status Code: %d (expected %d)' % (r.status_code, rqst["resp"]["code"])
+            errorMsg = 'ErRoR while retrieving information. Request: %s: Invalid Status Code: %d (expected %d)' % (name, r.status_code, rqst["resp"]["code"])
             myprint(0, errorMsg)
             return errorMsg
 
